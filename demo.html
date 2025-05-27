@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnimeWorld India API Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .anime-card {
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .anime-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .anime-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+        }
+        .anime-info {
+            padding: 10px;
+        }
+        .anime-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .anime-rating {
+            color: #f39c12;
+        }
+        .series-container, .player-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .episodes-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .season-selector {
+            margin-bottom: 20px;
+        }
+        .season-button {
+            padding: 8px 15px;
+            margin-right: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .active-season {
+            background-color: #f39c12;
+        }
+        .episode-item {
+            width: 150px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .episode-item img {
+            width: 100%;
+            height: 85px;
+            object-fit: cover;
+        }
+        .episode-info {
+            padding: 5px;
+            font-size: 14px;
+        }
+        .player-frame {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+        .server-button {
+            margin: 5px;
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .active-server {
+            background-color: #f39c12;
+        }
+        .back-button {
+            background-color: #2196F3;
+            margin-bottom: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AnimeWorld India API Demo</h1>
+        
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search for anime...">
+            <button id="search-button">Search</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <h3>Loading...</h3>
+        </div>
+        
+        <div id="search-results">
+            <h2>Search Results</h2>
+            <div class="results-container" id="results-container"></div>
+        </div>
+        
+        <div class="series-container" id="series-container">
+            <button class="back-button" id="back-to-search">Back to Search</button>
+            <div id="series-details"></div>
+            <h3>Episodes</h3>
+            <div class="episodes-list" id="episodes-list"></div>
+        </div>
+        
+        <div class="player-container" id="player-container">
+            <button class="back-button" id="back-to-series">Back to Series</button>
+            <h2 id="episode-title">Episode</h2>
+            <div id="player-frame-container"></div>
+        </div>
+    </div>
+    
+    <script src="api-client.js"></script>
+    <script>
+        // Initialize API client
+        const api = new AnimeWorldAPI();
+        
+        // DOM elements
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const resultsContainer = document.getElementById('results-container');
+        const searchResults = document.getElementById('search-results');
+        const seriesContainer = document.getElementById('series-container');
+        const seriesDetails = document.getElementById('series-details');
+        const episodesList = document.getElementById('episodes-list');
+        const playerContainer = document.getElementById('player-container');
+        const episodeTitle = document.getElementById('episode-title');
+        const playerFrameContainer = document.getElementById('player-frame-container');
+        const backToSearch = document.getElementById('back-to-search');
+        const backToSeries = document.getElementById('back-to-series');
+        const loading = document.getElementById('loading');
+        
+        let currentSeries = null;
+        
+        // Search for anime
+        searchButton.addEventListener('click', async () => {
+            const query = searchInput.value.trim();
+            if (!query) return;
+            
+            try {
+                showLoading();
+                const results = await api.search(query);
+                displaySearchResults(results);
+            } catch (error) {
+                console.error('Search error:', error);
+                alert('Error searching for anime. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        });
+        
+        // Allow search on Enter key
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchButton.click();
+            }
+        });
+        
+        // Display search results
+        function displaySearchResults(results) {
+            resultsContainer.innerHTML = '';
+            
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+            
+            results.forEach(anime => {
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                card.innerHTML = `
+                    <img src="${anime.poster}" alt="${anime.title}" onerror="this.src='https://via.placeholder.com/200x280?text=No+Image'">
+                    <div class="anime-info">
+                        <div class="anime-title">${anime.title}</div>
+                        <div class="anime-rating">Rating: ${anime.rating || 'N/A'}</div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => loadSeries(anime.id));
+                resultsContainer.appendChild(card);
+            });
+            
+            showSection(searchResults);
+        }
+        
+        // Load series details and episodes
+        async function loadSeries(id) {
+            try {
+                showLoading();
+                const seriesData = await api.getSeries(id);
+                currentSeries = seriesData;
+                
+                // Display series details
+                seriesDetails.innerHTML = `
+                    <div style="display: flex; margin-bottom: 20px;">
+                        <img src="${seriesData.poster}" alt="${seriesData.title}" style="width: 200px; height: 280px; object-fit: cover; margin-right: 20px;">
+                        <div>
+                            <h2>${seriesData.title}</h2>
+                            <p><strong>Rating:</strong> ${seriesData.rating || 'N/A'}</p>
+                            <p>${seriesData.description || 'No description available.'}</p>
+                            <div>
+                                ${Object.entries(seriesData.metadata || {}).map(([key, value]) => `<p><strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${value}</p>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Create season selector if multiple seasons exist
+                let seasonSelectorHtml = '';
+                if (seriesData.seasons && seriesData.seasons.length > 1) {
+                    seasonSelectorHtml = `
+                        <div class="season-selector">
+                            <h3>Seasons</h3>
+                            <div>
+                                ${seriesData.seasons.map((season, index) => `
+                                    <button class="season-button ${index === 0 ? 'active-season' : ''}" data-season="${season.number}">
+                                        ${season.name}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Insert season selector before episodes list
+                const seasonSelectorContainer = document.createElement('div');
+                seasonSelectorContainer.innerHTML = seasonSelectorHtml;
+                episodesList.parentNode.insertBefore(seasonSelectorContainer, episodesList);
+                
+                // Function to display episodes for a specific season
+                function displayEpisodesForSeason(seasonNumber) {
+                    // Find the season
+                    const season = seriesData.seasons.find(s => s.number === seasonNumber) || seriesData.seasons[0];
+                    const episodesToDisplay = season.episodes || seriesData.episodes;
+                    
+                    // Update season buttons
+                    document.querySelectorAll('.season-button').forEach(button => {
+                        if (parseInt(button.dataset.season) === seasonNumber) {
+                            button.classList.add('active-season');
+                        } else {
+                            button.classList.remove('active-season');
+                        }
+                    });
+                    
+                    // Display episodes
+                    episodesList.innerHTML = '';
+                    episodesToDisplay.forEach(episode => {
+                        const episodeItem = document.createElement('div');
+                        episodeItem.className = 'episode-item';
+                        episodeItem.innerHTML = `
+                            <img src="${episode.image}" alt="Episode ${episode.number}" onerror="this.src='https://via.placeholder.com/150x85?text=No+Image'">
+                            <div class="episode-info">
+                                <div>${episode.number}</div>
+                                <div>${episode.title || `Episode ${episode.number}`}</div>
+                            </div>
+                        `;
+                        
+                        episodeItem.addEventListener('click', () => loadPlayer(episode.id, episode.number, episode.title));
+                        episodesList.appendChild(episodeItem);
+                    });
+                }
+                
+                // Display episodes for the first season by default
+                const defaultSeason = seriesData.seasons && seriesData.seasons.length > 0 ? seriesData.seasons[0].number : 1;
+                displayEpisodesForSeason(defaultSeason);
+                
+                // Add event listeners to season buttons
+                document.querySelectorAll('.season-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const seasonNumber = parseInt(button.dataset.season);
+                        displayEpisodesForSeason(seasonNumber);
+                    });
+                });
+                
+                showSection(seriesContainer);
+            } catch (error) {
+                console.error('Error loading series:', error);
+                alert('Error loading series details. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Load player for an episode
+        async function loadPlayer(id, number, title) {
+            try {
+                showLoading();
+                const playerData = await api.getPlayer(id);
+                
+                episodeTitle.textContent = `${currentSeries.title} - ${title || `Episode ${number}`}`;
+                
+                // Store all sources for reference
+                const allSources = [
+                    { server: 0, src: playerData.iframe },
+                    ...(playerData.sources || [])
+                ];
+                
+                // Create the player frame with the active source
+                playerFrameContainer.innerHTML = `
+                    <iframe id="player-iframe" class="player-frame" src="${playerData.iframe}" frameborder="0" scrolling="no" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    
+                    ${playerData.servers && playerData.servers.length > 0 ? `
+                        <div style="margin-top: 10px;" class="server-buttons">
+                            <strong>Servers:</strong>
+                            ${playerData.servers.map((server, index) => `
+                                <button class="server-button ${server.active ? 'active-server' : ''}" data-index="${index}">${server.name}</button>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                
+                // Add event listeners to server buttons
+                const serverButtons = document.querySelectorAll('.server-button');
+                serverButtons.forEach((button, index) => {
+                    button.addEventListener('click', () => {
+                        // Find the source for this server
+                        const source = allSources.find(s => s.server === index + 1) || allSources[0];
+                        
+                        // Update the iframe source
+                        const iframe = document.getElementById('player-iframe');
+                        if (iframe && source && source.src) {
+                            iframe.src = source.src;
+                            
+                            // Update active state
+                            serverButtons.forEach(btn => btn.classList.remove('active-server'));
+                            button.classList.add('active-server');
+                        }
+                    });
+                });
+                
+                showSection(playerContainer);
+            } catch (error) {
+                console.error('Error loading player:', error);
+                alert('Error loading video player. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Navigation buttons
+        backToSearch.addEventListener('click', () => {
+            showSection(searchResults);
+        });
+        
+        backToSeries.addEventListener('click', () => {
+            showSection(seriesContainer);
+        });
+        
+        // Helper functions
+        function showSection(section) {
+            searchResults.style.display = 'none';
+            seriesContainer.style.display = 'none';
+            playerContainer.style.display = 'none';
+            
+            section.style.display = 'block';
+        }
+        
+        function showLoading() {
+            loading.style.display = 'block';
+        }
+        
+        function hideLoading() {
+            loading.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
