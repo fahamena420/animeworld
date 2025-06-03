@@ -3,7 +3,7 @@ import axios from 'axios';
 import { AnimeWorldIndiaMe } from '../providers/animeworld-india-me/index.js';
 
 const router = express.Router();
-const animeProvider = new AnimeWorldIndiaMe('https://goodproxy.goodproxy.workers.dev/fetch?url=https://animeworld-india.me');
+const animeProvider = new AnimeWorldIndiaMe('https://animeworld-india.me');
 
 // Helper function to search and get first result ID
 async function searchAndGetFirstId(query) {
