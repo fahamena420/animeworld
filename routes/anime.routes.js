@@ -2,7 +2,7 @@ import express from 'express';
 import { AnimeWorldIndiaMe } from '../providers/animeworld-india-me/index.js';
 
 const router = express.Router();
-const animeProvider = new AnimeWorldIndiaMe('https://animeworld-india.me');
+const animeProvider = new AnimeWorldIndiaMe('https://goodproxy.goodproxy.workers.dev/fetch?url=https://animeworld-india.me');
 
 // Endpoint for TV Shows by ID and Episode
 router.get('/:showId/:episodeNum/server/:serverName', async (req, res) => {
