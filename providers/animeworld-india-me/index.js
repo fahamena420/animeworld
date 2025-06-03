@@ -4,7 +4,7 @@ import { getSeriesData, getSeasonData } from './models/series.js';
 import { extractSource } from './models/source.js';
 
 export class AnimeWorldIndiaMe {
-  constructor(baseUrl = 'https://goodproxy.goodproxy.workers.dev/fetch?url=https://animeworld-india.me') {
+  constructor(baseUrl = 'https://animeworld-india.me') {
     this.baseUrl = baseUrl;
   }
 
