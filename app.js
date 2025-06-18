@@ -2,14 +2,10 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 
-// Import route files
-import animeRoutes from './routes/anime.routes.js';
-import tmdbRoutes from './routes/tmdb.routes.js';
-import playerRoutes from './routes/player.routes.js';
-import searchRoutes from './routes/search.routes.js';
-import seriesRoutes from './routes/series.routes.js';
-import sourceRoutes from './routes/source.routes.js';
-import anilistRoutes from './routes/anilist.routes.js';
+// Dependencies for dynamic route loading
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Verify TMDB API key is loaded
 if (!process.env.TMDB_API_KEY) {
@@ -25,14 +21,23 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Use route files
-app.use('/api/anime', animeRoutes);
-app.use('/api', tmdbRoutes);
-app.use('/api/player', playerRoutes);
-app.use('/api/search', searchRoutes);
-app.use('/api/series', seriesRoutes);
-app.use('/api/source', sourceRoutes);
-app.use('/api/anilist', anilistRoutes);
+// Dynamically load and use route files
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const routesPath = path.join(__dirname, 'routes');
+
+fs.readdirSync(routesPath)
+  .filter(file => file.endsWith('.js'))
+  .forEach(async (file) => {
+    const routeName = file.split('.')[0].replace('.routes', '');
+    const { default: route } = await import(`./routes/${file}`);
+    
+    // Handle special case for tmdb route, which uses a base path
+    const basePath = routeName === 'tmdb' ? '/api' : `/api/${routeName}`;
+    
+    app.use(basePath, route);
+    console.log(`Loaded route: ${basePath} from ${file}`);
+  });
 
 // Test endpoint to verify environment variables
 app.get('/api/test-env', (req, res) => {
