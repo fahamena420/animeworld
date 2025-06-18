@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { client as axios } from '../../utils/axios-client.js';
 import NodeCache from 'node-cache';
 import { extractPlayerData } from './player.js';
 
