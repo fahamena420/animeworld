@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import axios from 'axios';
+import { DEFAULT_REQUEST_HEADERS } from './providers/utils/constants.js';
 
 // Import route files
 import animeRoutes from './routes/anime.routes.js';
@@ -16,6 +18,12 @@ if (!process.env.TMDB_API_KEY) {
   console.error('Error: TMDB_API_KEY is not set in the environment variables');
   process.exit(1);
 }
+
+// Apply default headers to all outgoing Axios requests
+axios.defaults.headers.common = {
+  ...axios.defaults.headers.common,
+  ...DEFAULT_REQUEST_HEADERS,
+};
 
 // Initialize Express app
 const app = express();
