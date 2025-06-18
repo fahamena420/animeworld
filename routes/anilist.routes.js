@@ -2,7 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import { AnimeWorldIndiaMe } from '../providers/animeworld-india-me/index.js';
 
-const animeProvider = new AnimeWorldIndiaMe('https://animeworld-india.me');
+const animeProvider = new AnimeWorldIndiaMe();
 
 const router = express.Router();
 

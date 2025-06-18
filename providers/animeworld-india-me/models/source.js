@@ -1,4 +1,4 @@
-import { client as axios } from '../../utils/axios-client.js';
+import { client } from '../../utils/axios-client.js';
 import NodeCache from 'node-cache';
 import { extractPlayerData } from './player.js';
 
@@ -29,12 +29,12 @@ export async function extractSource(id, serverName, baseUrl) {
     if (!contentType) {
       try {
         // Try episode URL first
-        await axios.head(`${baseUrl}/episode/${id}`);
+        await client.get(`${baseUrl}/episode/${id}`);
         contentType = 'episode';
       } catch (episodeError) {
         try {
           // If episode fails, try movie URL
-          await axios.head(`${baseUrl}/movies/${id}`);
+          await client.get(`${baseUrl}/movies/${id}`);
           contentType = 'movie';
         } catch (movieError) {
           console.error(`Failed to determine content type for ID: ${id}`);

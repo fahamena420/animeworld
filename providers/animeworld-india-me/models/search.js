@@ -1,4 +1,4 @@
-import { client as axios } from '../../utils/axios-client.js';
+import { client } from '../../utils/axios-client.js';
 import * as cheerio from 'cheerio';
 import NodeCache from 'node-cache';
 
@@ -24,7 +24,7 @@ export async function searchContent(query, baseUrl) {
     const url = `${baseUrl}/?s=${encodeURIComponent(query)}`;
     
     // Fetch search results
-    const response = await axios.get(url);
+    const response = await client.get(url);
     const $ = cheerio.load(response.data);
     
     const searchResults = [];

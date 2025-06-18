@@ -1,4 +1,4 @@
-import { client as axios } from '../../utils/axios-client.js';
+import { client } from '../../utils/axios-client.js';
 import * as cheerio from 'cheerio';
 import NodeCache from 'node-cache';
 
@@ -46,7 +46,7 @@ export async function extractPlayerData(id, baseUrl) {
 
 async function extractPlayerDataFromUrl(url) {
   // Fetch the page content
-  const response = await axios.get(url);
+  const response = await client.get(url);
   if (response.status !== 200) {
     throw new Error('Failed to fetch content');
   }

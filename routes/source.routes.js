@@ -2,7 +2,7 @@ import express from 'express';
 import { AnimeWorldIndiaMe } from '../providers/animeworld-india-me/index.js';
 
 const router = express.Router();
-const animeProvider = new AnimeWorldIndiaMe('https://animeworld-india.me');
+const animeProvider = new AnimeWorldIndiaMe();
 
 // Route to extract source links from a specific server by name
 router.get('/:id/server/:name', async (req, res) => {

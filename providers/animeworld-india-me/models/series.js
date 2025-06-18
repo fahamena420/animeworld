@@ -1,4 +1,4 @@
-import { client as axios } from '../../utils/axios-client.js';
+import { client } from '../../utils/axios-client.js';
 import * as cheerio from 'cheerio';
 import NodeCache from 'node-cache';
 import fs from 'fs';
@@ -16,7 +16,7 @@ const cache = new NodeCache({ stdTTL: 60 * 60 * 24 });
 async function extractEpisodesFromWatchPage(url, seriesId, seasonNumber) {
   try {
     console.log(`Fetching episodes for season ${seasonNumber} from ${url}`);
-    const response = await axios.get(url);
+    const response = await client.get(url);
     const $ = cheerio.load(response.data);
     const episodes = [];
     
@@ -114,7 +114,7 @@ export async function getSeriesData(id, baseUrl) {
     try {
       const movieUrl = `${baseUrl}/movies/${id}`;
       console.log(`Trying movie URL: ${movieUrl}`);
-      const movieResponse = await axios.get(movieUrl);
+      const movieResponse = await client.get(movieUrl);
       
       // If we get here, it's a movie
       const $ = cheerio.load(movieResponse.data);
@@ -179,7 +179,7 @@ export async function getSeriesData(id, baseUrl) {
     const url = `${baseUrl}/series/${id}`;
     
     // Fetch series data
-    const response = await axios.get(url);
+    const response = await client.get(url);
     const $ = cheerio.load(response.data);
     
     // Extract series information
