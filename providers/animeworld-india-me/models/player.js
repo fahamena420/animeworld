@@ -29,8 +29,15 @@ export async function extractPlayerData(id, baseUrl) {
         url = `${baseUrl}/movies/${id}`;
         playerData = await extractPlayerDataFromUrl(url);
       } catch (movieError) {
-        console.error(`Both episode and movie URLs failed for ID: ${id}`);
-        throw new Error('Content not found at episode or movie URL');
+        console.log(`Movie URL failed, trying base URL for ID: ${id}`);
+        // If movie URL also fails, try the base URL with the ID as a slug
+        try {
+          url = `${baseUrl}/${id}`;
+          playerData = await extractPlayerDataFromUrl(url);
+        } catch (baseError) {
+          console.error(`All episode, movie, and base URLs failed for ID: ${id}`);
+          throw new Error('Content not found at episode, movie, or base URL');
+        }
       }
     }
     

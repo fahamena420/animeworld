@@ -1,9 +1,14 @@
 import express from 'express';
 import axios from 'axios';
 import { AnimeWorldIndiaMe } from '../providers/animeworld-india-me/index.js';
+import { AnimeDekho } from '../providers/animedekho/index.js';
 
 const router = express.Router();
-const animeProvider = new AnimeWorldIndiaMe('https://animeworld-india.me');
+
+const providers = {
+  animeworld: new AnimeWorldIndiaMe('https://animeworld-india.me'),
+  animedekho: new AnimeDekho(),
+};
 const SIMILARITY_THRESHOLD = 0.6; // Minimum similarity score to consider a match valid
 
 // Helper function to calculate string similarity (Levenshtein distance)
@@ -151,9 +156,19 @@ router.get('/:tmdbId/:seasonNum/:episodeNum/server/:serverName', async (req, res
       console.log(`Best match for "${showName}": "${bestMatch.title}" (ID: ${bestMatch.id}) with similarity score: ${highestSimilarity.toFixed(2)}`);
     }
     
-    // Get the source using the format: {showId}-{seasonNum}x{episodeNum}
-    const episodeId = `${showId}-${seasonNum}x${episodeNum}`;
-    const sourceData = await animeProvider.getSource(episodeId, serverName);
+    const animeProvider = providers[serverName] || providers.animeworld;
+
+    // The animedekho provider uses a different ID format
+    let sourceData;
+    if (serverName === 'animedekho') {
+      const episodeId = `${tmdbId}-${seasonNum}x${episodeNum}`;
+      sourceData = await animeProvider.getSource(episodeId, serverName);
+    } else {
+      // Get the source using the format: {showId}-{seasonNum}x{episodeNum}
+      const episodeId = `${showId}-${seasonNum}x${episodeNum}`;
+      sourceData = await animeProvider.getSource(episodeId, serverName);
+    }
+
     
     res.json({
       success: true,
@@ -241,8 +256,18 @@ router.get('/movie/:tmdbId/server/:serverName', async (req, res) => {
       console.log(`Best match for "${movieTitle}": "${bestMatch.title}" (ID: ${bestMatch.id}) with similarity score: ${highestSimilarity.toFixed(2)}`);
     }
     
-    // Get the source
-    const sourceData = await animeProvider.getSource(movieId, serverName);
+    const animeProvider = providers[serverName] || providers.animeworld;
+
+    // The animedekho provider uses a different ID format
+    let sourceData;
+    if (serverName === 'animedekho') {
+      // For movies, animedekho doesn't need season/episode, just tmdbId
+      const episodeId = `${tmdbId}-1x1`; // Dummy season/episode
+      sourceData = await animeProvider.getSource(episodeId, serverName);
+    } else {
+      // Get the source
+      sourceData = await animeProvider.getSource(movieId, serverName);
+    }
     
     res.json({
       success: true,
