@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { load } from 'cheerio';
 
-const animedekhoAxios = axios.create({
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Referer': 'https://animedekho.co/'
-  }
+export const client = axios.create({
+  baseURL: 'https://animedekho.co',
+headers: {
+  'Cookie': '_ga=GA1.1.1282672089.1752212056; cf_clearance=xgJXPW9TMCWjtu7fy2OIOxBwz6snXVZU7VzNcFaDOrM-1753899897-1.2.1.1-Kv336PJ30vcQi_eZN6ksTBMd9g8.LuYLaHWFWAHanfaLyhQTz.qnIaUPYU3Csmh9glkBsKhDk5soP_Llhfl15DVIb_4xyo3DMh1aewXG4f7Pt0UvvAz9zGU2LV5Mucs9mqIqG9YzmblPCS6Kn5ggyTlbDvLsSfeiA14poBS02RiYk5FqytB.EGrKSQAKzzfs_Uo7xVULwohAu6uzht.doYNri79T9rqAL5MRfDxknxs; _ga_EJ4KLKMPZZ=GS2.1.s1754023393$o4$g1$t1754024326$j40$l0$h0',
+  'Referer': 'https://animedekho.co/',
+  'Sec-Ch-Ua': '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+}
 });
 
 export class AnimeDekho {
@@ -19,10 +21,10 @@ export class AnimeDekho {
       const [tmdbId, seasonEpisode] = id.split('-');
       const [season, episode] = seasonEpisode.split('x');
 
-      const embedUrl = `${this.baseUrl}/embed/${tmdbId}/${season}-${episode}`;
+      const embedUrl = `/embed/${tmdbId}/${season}-${episode}`;
       
       // First, get the embed page to find the iframe source
-      const embedResponse = await animedekhoAxios.get(embedUrl);
+      const embedResponse = await client.get(embedUrl);
       const $ = load(embedResponse.data);
       const iframeSrc = $('iframe').attr('src');
 
