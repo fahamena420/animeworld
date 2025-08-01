@@ -3,11 +3,18 @@ import { load } from 'cheerio';
 
 export const client = axios.create({
   baseURL: 'https://animedekho.co',
-headers: {
-  'Cookie': '_ga=GA1.1.1282672089.1752212056; cf_clearance=xgJXPW9TMCWjtu7fy2OIOxBwz6snXVZU7VzNcFaDOrM-1753899897-1.2.1.1-Kv336PJ30vcQi_eZN6ksTBMd9g8.LuYLaHWFWAHanfaLyhQTz.qnIaUPYU3Csmh9glkBsKhDk5soP_Llhfl15DVIb_4xyo3DMh1aewXG4f7Pt0UvvAz9zGU2LV5Mucs9mqIqG9YzmblPCS6Kn5ggyTlbDvLsSfeiA14poBS02RiYk5FqytB.EGrKSQAKzzfs_Uo7xVULwohAu6uzht.doYNri79T9rqAL5MRfDxknxs; _ga_EJ4KLKMPZZ=GS2.1.s1754023393$o4$g1$t1754024326$j40$l0$h0',
-  'Referer': 'https://animedekho.co/',
-  'Sec-Ch-Ua': '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
-}
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://animedekho.co/',
+    'Cookie': '_ga=GA1.1.1282672089.1752212056; cf_clearance=xgJXPW9TMCWjtu7fy2OIOxBwz6snXVZU7VzNcFaDOrM-1753899897-1.2.1.1-Kv336PJ30vcQi_eZN6ksTBMd9g8.LuYLaHWFWAHanfaLyhQTz.qnIaUPYU3Csmh9glkBsKhDk5soP_Llhfl15DVIb_4xyo3DMh1aewXG4f7Pt0UvvAz9zGU2LV5Mucs9mqIqG9YzmblPCS6Kn5ggyTlbDvLsSfeiA14poBS02RiYk5FqytB.EGrKSQAKzzfs_Uo7xVULwohAu6uzht.doYNri79T9rqAL5MRfDxknxs; _ga_EJ4KLKMPZZ=GS2.1.s1754023393$o4$g1$t1754024326$j40$l0$h0',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1'
+  }
 });
 
 export class AnimeDekho {
