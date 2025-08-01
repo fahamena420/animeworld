@@ -1,6 +1,13 @@
 import axios from 'axios';
 import { load } from 'cheerio';
 
+const animedekhoAxios = axios.create({
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Referer': 'https://animedekho.co/'
+  }
+});
+
 export class AnimeDekho {
   constructor(baseUrl = 'https://animedekho.co') {
     this.baseUrl = baseUrl;
@@ -15,7 +22,7 @@ export class AnimeDekho {
       const embedUrl = `${this.baseUrl}/embed/${tmdbId}/${season}-${episode}`;
       
       // First, get the embed page to find the iframe source
-      const embedResponse = await axios.get(embedUrl);
+      const embedResponse = await animedekhoAxios.get(embedUrl);
       const $ = load(embedResponse.data);
       const iframeSrc = $('iframe').attr('src');
 

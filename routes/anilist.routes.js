@@ -155,7 +155,27 @@ router.get('/:anilistId/episodeNum/:episodeNum/server/:serverName', async (req, 
     // Step 3: Search provider for the show (if necessary)
     let showId = tmdbId; // Default to tmdbId for providers that don't need a search (like animedekho)
     if (serverName !== 'animedekho') {
-      const searchResults = await animeProvider.search(showName);
+      let searchResults = await animeProvider.search(showName);
+
+      // If no results, try searching with other titles from AniList
+      if (!searchResults || searchResults.length === 0) {
+        console.log(`No results for "${showName}". Trying alternative titles...`);
+        const { data: aniListData } = await axios.post('https://graphql.anilist.co', {
+          query: `query ($id: Int) { Media(id: $id, type: ANIME) { title { romaji native } } }`,
+          variables: { id: parseInt(anilistId) }
+        });
+
+        const titles = aniListData.data?.Media?.title;
+        if (titles) {
+          if (titles.romaji && titles.romaji.toLowerCase() !== showName.toLowerCase()) {
+            searchResults = await animeProvider.search(titles.romaji);
+          }
+          if ((!searchResults || searchResults.length === 0) && titles.native && titles.native.toLowerCase() !== showName.toLowerCase()) {
+            searchResults = await animeProvider.search(titles.native);
+          }
+        }
+      }
+
       if (!searchResults || searchResults.length === 0) {
         return res.status(404).json({ success: false, error: `No results found for "${showName}" in the provider` });
       }
